@@ -8,7 +8,11 @@ services:
       - ./backend:/app
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/mydatabase
-  frontend:
+    profiles:
+      - dev
+      - prod
+
+  frontend-dev:
     build:
       context: ./frontend
       target: build
@@ -17,6 +21,17 @@ services:
     volumes:
       - ./frontend/src:/app/src
     command: npm start
+    profiles:
+      - dev
+
+  frontend-prod:
+    build:
+      context: ./frontend
+    ports:
+      - "80:80"
+    profiles:
+      - prod
+
   db:
     image: postgres:13
     environment:
@@ -25,6 +40,9 @@ services:
       - POSTGRES_DB=mydatabase
     volumes:
       - postgres_data:/var/lib/postgresql/data/
+    profiles:
+      - dev
+      - prod
 
 volumes:
   postgres_data:
