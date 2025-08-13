@@ -1,0 +1,20 @@
+{
+	"name": "RPSSL-FE",
+	"dockerComposeFile": [
+		"../../docker-compose.yml"
+	],
+	"service": "frontend-dev",
+	"workspaceFolder": "/app",
+	"shutdownAction": "none",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"dbaeumer.vscode-eslint",
+				"esbenp.prettier-vscode"
+			]
+		}
+	},
+	"runServices": [
+		"backend", "db"
+	]
+}

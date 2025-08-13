@@ -29,7 +29,9 @@ const Home = () => {
             .then((data) => setMessage(data));
     }, []);
 
-    return <p>{message}</p>;
+    return <>
+        <p>{message}</p>
+    </>
 };
 
 export default App;
