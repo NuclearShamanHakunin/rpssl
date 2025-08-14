@@ -90,6 +90,36 @@ def play():
     return ""
 
 
+@app.route('/highscores', methods=['GET'])
+def get_highscores():
+    try:
+        limit = int(request.args.get('limit', 10))
+    except ValueError:
+        return jsonify({"msg": "Invalid limit parameter"}), 400
+
+    highscores_data = Highscore.get_top(limit)
+
+    if highscores_data is None:
+        return jsonify({"msg": "Failed to retrieve highscores."}), 500
+
+    result = [
+        {
+            "username": hs.user.username,
+            "wins": hs.wins,
+            "losses": hs.losses
+        } for hs in highscores_data
+    ]
+    return jsonify(result)
+
+
+@app.route('/highscores/reset', methods=['POST'])
+def reset_highscores():
+    if Highscore.reset_all():
+        return jsonify({"msg": "All highscores have been reset."})
+    else:
+        return jsonify({"msg": "Failed to reset highscores."}), 500
+
+
 with app.app_context():
     db.create_all()
 
