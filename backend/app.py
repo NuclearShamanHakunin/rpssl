@@ -2,6 +2,8 @@ import os
 from flask import Flask, request, session, jsonify
 from .database import db
 from .user import User
+from .highscore import Highscore
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
@@ -24,6 +26,11 @@ def register():
     new_user = User(username=username)
     new_user.set_password(password)
     db.session.add(new_user)
+    db.session.flush() # get new .id
+
+    new_highscore = Highscore(user_id=new_user.id)
+    db.session.add(new_highscore)
+
     db.session.commit()
 
     return jsonify({"msg": "User created successfully"}), 201
@@ -56,7 +63,11 @@ def profile():
         return jsonify({"msg": "Unauthorized"}), 401
 
     user = User.query.get(session['user_id'])
-    return jsonify({"username": user.username})
+    return jsonify({
+        "username": user.username,
+        "wins": user.highscore.wins,
+        "losses": user.highscore.losses
+    })
 
 
 @app.route('/api')
@@ -81,6 +92,7 @@ def play():
 
 with app.app_context():
     db.create_all()
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
