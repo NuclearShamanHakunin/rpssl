@@ -1,11 +1,17 @@
-from .database import db
+from sqlalchemy import Column, Integer, ForeignKey, desc
+from sqlalchemy.orm import relationship
+from sqlalchemy.future import select
+from .database import Base
+from .user import User
+from sqlalchemy.ext.asyncio import AsyncSession
 
-class Highscore(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    wins = db.Column(db.Integer, default=0)
-    losses = db.Column(db.Integer, default=0)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    user = db.relationship('User', back_populates='highscore')
+class Highscore(Base):
+    __tablename__ = 'highscore'
+    id = Column(Integer, primary_key=True)
+    wins = Column(Integer, default=0)
+    losses = Column(Integer, default=0)
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    user = relationship('User', back_populates='highscore')
 
     def add_win(self):
         self.wins += 1
@@ -14,19 +20,26 @@ class Highscore(db.Model):
         self.losses += 1
 
     @staticmethod
-    def get_top(limit=10):
-        from .user import User
+    async def get_top(db: AsyncSession, limit: int = 10):
         try:
-            return Highscore.query.join(User).order_by((Highscore.wins - Highscore.losses).desc()).limit(limit).all()
+            result = await db.execute(
+                select(Highscore)
+                .join(User)
+                .order_by(desc(Highscore.wins - Highscore.losses))
+                .limit(limit)
+            )
+            return result.scalars().all()
         except Exception:
             return None
-    
+
     @staticmethod
-    def reset_all():
+    async def reset_all(db: AsyncSession):
         try:
-            Highscore.query.update({Highscore.wins: 0, Highscore.losses: 0})
-            db.session.commit()
+            await db.execute(
+                Highscore.__table__.update().values(wins=0, losses=0)
+            )
+            await db.commit()
             return True
         except Exception:
-            db.session.rollback()
+            await db.rollback()
             return False

@@ -1,5 +1,6 @@
-import requests
+import httpx
 import asyncio
+import json
 from pydantic import BaseModel, ValidationError
 
 
@@ -15,15 +16,16 @@ class RandomServiceError(Exception):
 
 
 async def get_random_number() -> int:
-    for _ in range(NUMBER_OF_RETRIES):
-        try:
-            response = await asyncio.to_thread(requests.get, "https://codechallenge.boohma.com/random", timeout=5)
-            response.raise_for_status()
-            data = response.json()
-            random_number_obj = RandomNumber(**data)
-            return random_number_obj.random_number
-        except (requests.exceptions.RequestException, ValidationError):
-            await asyncio.sleep(0.05)
-            continue
+    async with httpx.AsyncClient() as client:
+        for _ in range(NUMBER_OF_RETRIES):
+            try:
+                response = await client.get("https://codechallenge.boohma.com/random", timeout=5)
+                response.raise_for_status()
+                data = response.json()
+                random_number_obj = RandomNumber(**data)
+                return random_number_obj.random_number
+            except (httpx.RequestError, ValidationError, json.JSONDecodeError):
+                await asyncio.sleep(0.05)
+                continue
 
-    raise RandomServiceError("Failed to get random number after 3 attempts.")
+        raise RandomServiceError("Failed to get random number after 3 attempts.")

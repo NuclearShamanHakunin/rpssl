@@ -1,128 +1,155 @@
 import os
-from flask import Flask, request, session, jsonify
-from .database import db
+from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from jose import JWTError, jwt
+from datetime import datetime, timedelta
+
+from .database import get_db, engine, Base
 from .user import User
 from .highscore import Highscore
 
+# Pydantic models
+class UserCreate(BaseModel):
+    username: str
+    password: str
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'a_default_secret_key')
-db.init_app(app)
+class UserOut(BaseModel):
+    username: str
+    wins: int
+    losses: int
 
+class Token(BaseModel):
+    access_token: str
+    token_type: str
 
-@app.route('/register', methods=['POST'])
-def register():
-    data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
+class TokenData(BaseModel):
+    username: str | None = None
 
-    if not username or not password:
-        return jsonify({"msg": "Missing username or password"}), 400
+# FastAPI app
+app = FastAPI()
 
-    if User.query.filter_by(username=username).first():
-        return jsonify({"msg": "Username already exists"}), 400
+# Security
+SECRET_KEY = os.environ.get("SECRET_KEY", "a_default_secret_key")
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-    new_user = User(username=username)
-    new_user.set_password(password)
-    db.session.add(new_user)
-    db.session.flush() # get new .id
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
+    
+    result = await db.execute(select(User).where(User.username == token_data.username))
+    user = result.scalars().first()
+
+    if user is None:
+        raise credentials_exception
+    return user
+
+@app.on_event("startup")
+async def startup():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+@app.post("/register", status_code=status.HTTP_201_CREATED)
+async def register(user: UserCreate, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).where(User.username == user.username))
+    db_user = result.scalars().first()
+    if db_user:
+        raise HTTPException(status_code=400, detail="Username already exists")
+
+    new_user = User(username=user.username)
+    new_user.set_password(user.password)
+    db.add(new_user)
+    await db.flush()
 
     new_highscore = Highscore(user_id=new_user.id)
-    db.session.add(new_highscore)
+    db.add(new_highscore)
+    
+    await db.commit()
+    return {"msg": "User created successfully"}
 
-    db.session.commit()
+@app.post("/token", response_model=Token)
+async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).where(User.username == form_data.username))
+    user = result.scalars().first()
+    if not user or not user.check_password(form_data.password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
 
-    return jsonify({"msg": "User created successfully"}), 201
+@app.get("/profile", response_model=UserOut)
+async def read_users_me(current_user: User = Depends(get_current_user)):
+    return {
+        "username": current_user.username,
+        "wins": current_user.highscore.wins,
+        "losses": current_user.highscore.losses,
+    }
 
-
-@app.route('/login', methods=['POST'])
-def login():
-    data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
-
-    user = User.query.filter_by(username=username).first()
-
-    if user and user.check_password(password):
-        session['user_id'] = user.id
-        return jsonify({"msg": "Logged in successfully"})
-
-    return jsonify({"msg": "Invalid username or password"}), 401
-
-
-@app.route('/logout')
-def logout():
-    session.pop('user_id', None)
-    return jsonify({"msg": "Logged out successfully"})
-
-
-@app.route('/profile')
-def profile():
-    if 'user_id' not in session:
-        return jsonify({"msg": "Unauthorized"}), 401
-
-    user = User.query.get(session['user_id'])
-    return jsonify({
-        "username": user.username,
-        "wins": user.highscore.wins,
-        "losses": user.highscore.losses
-    })
-
-
-@app.route('/api')
+@app.get("/api")
 def hello():
     return "Hello from the backend!"
 
-
-@app.route('/choices', methods=['GET'])
+@app.get("/choices")
 def get_choices():
     return []
 
-
-@app.route('/choice', methods=['GET'])
+@app.get("/choice")
 def get_choice():
     return ""
 
-
-@app.route('/play', methods=['POST'])
+@app.post("/play")
 def play():
     return ""
 
-
-@app.route('/highscores', methods=['GET'])
-def get_highscores():
-    try:
-        limit = int(request.args.get('limit', 10))
-    except ValueError:
-        return jsonify({"msg": "Invalid limit parameter"}), 400
-
-    highscores_data = Highscore.get_top(limit)
-
+@app.get("/highscores")
+async def get_highscores(limit: int = 10, db: AsyncSession = Depends(get_db)):
+    highscores_data = await Highscore.get_top(db, limit)
     if highscores_data is None:
-        return jsonify({"msg": "Failed to retrieve highscores."}), 500
-
-    result = [
+        raise HTTPException(status_code=500, detail="Failed to retrieve highscores.")
+    
+    return [
         {
             "username": hs.user.username,
             "wins": hs.wins,
             "losses": hs.losses
         } for hs in highscores_data
     ]
-    return jsonify(result)
 
-
-@app.route('/highscores/reset', methods=['POST'])
-def reset_highscores():
-    if Highscore.reset_all():
-        return jsonify({"msg": "All highscores have been reset."})
+@app.post("/highscores/reset")
+async def reset_highscores(db: AsyncSession = Depends(get_db)):
+    if await Highscore.reset_all(db):
+        return {"msg": "All highscores have been reset."}
     else:
-        return jsonify({"msg": "Failed to reset highscores."}), 500
-
-
-with app.app_context():
-    db.create_all()
-
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+        raise HTTPException(status_code=500, detail="Failed to reset highscores.")
