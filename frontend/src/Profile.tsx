@@ -5,21 +5,25 @@ const Profile = () => {
     const [message, setMessage] = useState('');
 
     useEffect(() => {
-        const fetchProfile = async () => {
-            const response = await fetch('/profile');
-            const data = await response.json();
-            if (response.ok) {
-                setUsername(data.username);
-            } else {
-                setMessage(data.msg);
-                window.location.href = '/login';
-            }
-        };
-        fetchProfile();
+        const token = localStorage.getItem('token');
+        fetch('/profile', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.username) {
+                    setUsername(data.username);
+                } else {
+                    setMessage(data.detail);
+                    window.location.href = '/login';
+                }
+            });
     }, []);
 
-    const handleLogout = async () => {
-        await fetch('/logout');
+    const handleLogout = () => {
+        localStorage.removeItem('token');
         window.location.href = '/login';
     };
 
