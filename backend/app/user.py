@@ -1,7 +1,9 @@
-from werkzeug.security import generate_password_hash, check_password_hash
+from passlib.context import CryptContext
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 from .database import Base
+
+pwd_context = CryptContext(schemes=["bcrypt"])
 
 class User(Base):
     __tablename__ = 'user'
@@ -11,11 +13,7 @@ class User(Base):
     highscore = relationship('Highscore', back_populates='user', uselist=False)
 
     def set_password(self, password):
-        self.password_hash = generate_password_hash(
-            password,
-            method='pbkdf2:sha256',
-            salt_length=16
-        )
+        self.password_hash = pwd_context.hash(password)
 
     def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+        return pwd_context.verify(password, self.password_hash)
