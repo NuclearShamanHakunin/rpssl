@@ -3,12 +3,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from .database import get_db, engine, Base
 from .highscore import Highscore
-from . import auth
+from .auth import router
 
 # FastAPI app
 app = FastAPI()
 
-app.include_router(auth.router)
+app.include_router(router)
 
 @app.on_event("startup")
 async def startup():
