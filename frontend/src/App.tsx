@@ -12,8 +12,6 @@ import {
     Toolbar, 
     Typography, 
     Button, 
-    Container, 
-    Box, 
     CssBaseline, 
     createTheme, 
     ThemeProvider 
@@ -23,6 +21,7 @@ import Login from './Login';
 import Profile from './Profile';
 import Play from './Play';
 import Leaderboard from './Leaderboard';
+import Home from './Home';
 
 const theme = createTheme({
   palette: {
@@ -74,22 +73,6 @@ const Navbar: React.FC = () => {
                 )}
             </Toolbar>
         </AppBar>
-    );
-};
-
-
-const Home: React.FC = () => {
-    return (
-        <Container>
-            <Box sx={{ my: 4 }}>
-                <Typography variant="h4" component="h1" gutterBottom>
-                   Home Page
-                </Typography>
-                <Typography variant="body1">
-                    Rock, Paper, Scissors, Lizard, Spock Game
-                </Typography>
-            </Box>
-        </Container>
     );
 };
 
