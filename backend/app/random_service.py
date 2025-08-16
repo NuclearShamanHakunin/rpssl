@@ -1,14 +1,14 @@
 import httpx
 import asyncio
 import json
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, Field, ValidationError
 
 
 NUMBER_OF_RETRIES = 3
 
 
 class RandomNumber(BaseModel):
-    random_number: int
+    random_number: int = Field(..., ge=1, le=100)
 
 
 class RandomServiceError(Exception):
