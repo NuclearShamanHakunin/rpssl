@@ -56,14 +56,16 @@ const Navbar: React.FC = () => {
             <Toolbar>
                 <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                     <Button color="inherit" component={Link} to="/">Home</Button>
+                    {token && (
+                        <>
+                            <Button color="inherit" component={Link} to="/play">Play</Button>
+                            <Button color="inherit" component={Link} to="/profile">Profile</Button>
+                        </>
+                    )}
                 </Typography>
 
                 {token ? (
-                    <>
-                        <Button color="inherit" component={Link} to="/play">Play</Button>
-                        <Button color="inherit" component={Link} to="/profile">Profile</Button>
-                        <Button color="inherit" onClick={handleLogout}>Logout</Button>
-                    </>
+                    <Button color="inherit" onClick={handleLogout}>Logout</Button>
                 ) : (
                     <Button color="inherit" component={Link} to="/login">Login</Button>
                 )}
