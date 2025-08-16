@@ -15,7 +15,7 @@ const Home: React.FC = () => {
                 </Typography>
                 <br/>
                 <Typography variant="body2">
-                    This is an expanded version of the classic game "Rock, Paper, Scissors". Hover over the game icons in order to see which ones beat which, the ones it beat will be highlighted in green and the one it loses to will be highlighted in red.
+                    An expanded take on Rock, Paper, Scissors. Hover over an icon to see what it wins against (green) and what it loses to (red).
                 </Typography>
                 <Typography variant="body2">
                     
