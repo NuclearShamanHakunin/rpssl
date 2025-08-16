@@ -22,6 +22,7 @@ import {
 import Login from './Login';
 import Profile from './Profile';
 import Play from './Play';
+import Leaderboard from './Leaderboard';
 
 const theme = createTheme({
   palette: {
@@ -65,6 +66,7 @@ const Navbar: React.FC = () => {
                     )}
                 </Typography>
 
+                <Button color="inherit" component={Link} to="/leaderboard">Leaderboard</Button>
                 {token ? (
                     <Button color="inherit" onClick={handleLogout}>Logout</Button>
                 ) : (
@@ -90,7 +92,6 @@ const Home: React.FC = () => {
         </Container>
     );
 };
-
 
 
 const App: React.FC = () => {
@@ -119,6 +120,7 @@ const App: React.FC = () => {
                                 </PrivateRoute>
                             }
                         />
+                        <Route path="/leaderboard" element={<Leaderboard />} />
                         <Route path="*" element={<Navigate to="/" />} />
                     </Routes>
                 </main>

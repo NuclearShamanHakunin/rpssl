@@ -11,7 +11,7 @@ class Highscore(Base):
     wins = Column(Integer, default=0)
     losses = Column(Integer, default=0)
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
-    user = relationship('User', back_populates='highscore')
+    user = relationship('User', back_populates='highscore', lazy='joined')
 
     def add_win(self):
         self.wins += 1
