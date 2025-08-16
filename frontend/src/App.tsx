@@ -25,7 +25,7 @@ import Profile from './Profile';
 const theme = createTheme({
   palette: {
     mode: 'dark',
-  },
+  },  
 });
 
 
