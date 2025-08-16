@@ -20,7 +20,7 @@ Ensure you have **Docker** and **Docker Compose** installed on your system.
 
 ### Development Mode
 
-This mode enables hot-reloading for both the frontend and backend, making it ideal for development.
+This mode enables hot-reloading for both the frontend, making it ideal for development.
 
 1.  Clone the repository.
 2.  Run the following command from the project root:
