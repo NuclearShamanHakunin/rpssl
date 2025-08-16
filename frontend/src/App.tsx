@@ -21,6 +21,7 @@ import {
 
 import Login from './Login';
 import Profile from './Profile';
+import Play from './Play';
 
 const theme = createTheme({
   palette: {
@@ -107,6 +108,14 @@ const App: React.FC = () => {
                             element={
                                 <PrivateRoute>
                                     <Profile />
+                                </PrivateRoute>
+                            }
+                        />
+                        <Route
+                            path="/play"
+                            element={
+                                <PrivateRoute>
+                                    <Play />
                                 </PrivateRoute>
                             }
                         />
