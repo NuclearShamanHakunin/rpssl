@@ -6,22 +6,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import relationship
 from sqlalchemy.future import select
 from jose import JWTError, jwt
-from enum import Enum
-
 
 from .database import Base, get_db
 from .config import SECRET_KEY, ALGORITHM
-from .schemas import TokenData, UserOut
+from .schemas import TokenData, UserOut, UserType
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-
-class UserType(str, Enum):
-    USER = "USER"
-    ADMIN = "ADMIN"
-
-
 router = APIRouter()
 
 

@@ -8,6 +8,11 @@ class GameResult(str, Enum):
     TIE = "tie"
 
 
+class UserType(str, Enum):
+    USER = "USER"
+    ADMIN = "ADMIN"
+
+
 class UserCreate(BaseModel):
     username: str
     password: str
@@ -26,7 +31,7 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: str | None = None
-    user_type: str | None = None
+    user_type: UserType | None = None
 
 
 class PlayRequest(BaseModel):
