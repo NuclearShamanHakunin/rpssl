@@ -148,17 +148,17 @@ const Play: React.FC = () => {
                     {resultText}
                 </Typography>
                 <Grid container spacing={2} justifyContent="center" alignItems="center">
-                    <Grid item xs={5} textAlign="center">
+                    <Grid textAlign="center">
                         <Typography variant="h6">You Chose</Typography>
                         <Paper elevation={3} sx={{ p: 2, display: 'inline-block' }}>
                             <img src={choiceImages[playerChoice.name.toLowerCase()]} alt={playerChoice.name} style={{ width: 120, height: 120 }} />
                             <Typography variant="body1" sx={{textTransform: 'capitalize'}}>{playerChoice.name}</Typography>
                         </Paper>
                     </Grid>
-                    <Grid item xs={2} textAlign="center">
+                    <Grid textAlign="center">
                         <Typography variant="h4">VS</Typography>
                     </Grid>
-                    <Grid item xs={5} textAlign="center">
+                    <Grid textAlign="center">
                         <Typography variant="h6">Computer Chose</Typography>
                          <Paper elevation={3} sx={{ p: 2, display: 'inline-block' }}>
                             <img src={choiceImages[computerChoice.name.toLowerCase()]} alt={computerChoice.name} style={{ width: 120, height: 120 }} />
@@ -204,7 +204,7 @@ const Play: React.FC = () => {
                 ) : (
                     <Grid container spacing={4} justifyContent="center" sx={{ mt: 2 }}>
                         {choices.map((choice) => (
-                            <Grid item key={choice.id}>
+                            <Grid key={choice.id}>
                                 <Paper
                                     elevation={3}
                                     onClick={() => handleChoiceClick(choice.id)}
