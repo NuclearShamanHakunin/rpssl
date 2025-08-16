@@ -51,8 +51,7 @@ async def get_choices():
 @router.get("/choice")
 async def get_choice():
     try:
-        random_number = await get_random_number()
-        choice_index = random_number % len(VALID_CHOICES)
+        choice_index = await get_random_number() % len(VALID_CHOICES)
         return VALID_CHOICES[choice_index]
     except RandomServiceError:
         raise HTTPException(status_code=503, detail="Service unavailable")
