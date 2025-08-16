@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field, ValidationError
 
 
 NUMBER_OF_RETRIES = 3
-
+RETRY_TIMER_SECONDS = 0.25
 
 class RandomNumber(BaseModel):
     random_number: int = Field(..., ge=1, le=100)
@@ -25,7 +25,7 @@ async def get_random_number() -> int:
                 random_number_obj = RandomNumber(**data)
                 return random_number_obj.random_number
             except (httpx.RequestError, ValidationError, json.JSONDecodeError):
-                await asyncio.sleep(0.05)
+                await asyncio.sleep(RETRY_TIMER_SECONDS)
                 continue
 
         raise RandomServiceError("Failed to get random number after 3 attempts.")
