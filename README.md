@@ -47,7 +47,7 @@ This command builds the optimized frontend assets and runs the application in a 
 
 The application features two distinct user roles:
 
-* **Admin User** 👑
+* **Admin User**
     * **Default Credentials**: `admin` / `admin`
         * These can be changed during setup
     * **Abilities**: This user is created automatically when the application starts. The admin has the unique ability to reset the high scores for all players from the main game page.
