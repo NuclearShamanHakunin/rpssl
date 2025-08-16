@@ -24,9 +24,11 @@ This mode enables hot-reloading for both the frontend, making it ideal for devel
 
 1.  Clone the repository.
 2.  Run the following command from the project root:
+
     ```bash
     docker-compose --profile dev up --build
     ```
+    
 3.  Access the application:
       * Frontend: `http://localhost:3000`
       * Backend API: `http://localhost:5000`
@@ -40,7 +42,7 @@ This command builds the optimized frontend assets and runs the application in a 
     ```bash
     docker-compose --profile prod up --build
     ```
-    
+
 2.  Access the application at `http://localhost:80`.
 
 -----
