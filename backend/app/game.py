@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .random_service import get_random_number
+from .random_service import RandomServiceError, get_random_number
 from .schemas import PlayRequest, PlayResponse, GameResult
 from .user import User, get_current_user
 from .database import get_db
@@ -50,9 +50,12 @@ async def get_choices():
 
 @router.get("/choice")
 async def get_choice():
-    random_number = await get_random_number()
-    choice_index = random_number % len(VALID_CHOICES)
-    return VALID_CHOICES[choice_index]
+    try:
+        random_number = await get_random_number()
+        choice_index = random_number % len(VALID_CHOICES)
+        return VALID_CHOICES[choice_index]
+    except RandomServiceError:
+        raise HTTPException(status_code=503, detail="Service unavailable")
 
 
 def calculate_winner(player_choice: int, computer_choice: int) -> str:
@@ -65,7 +68,10 @@ async def play(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    computer_choice = await get_random_number() % len(VALID_CHOICES)
+    try:
+        computer_choice = await get_random_number() % len(VALID_CHOICES)
+    except RandomServiceError:
+        raise HTTPException(status_code=503, detail="Service unavailable")
 
     result = calculate_winner(play_request.player, computer_choice)
 
