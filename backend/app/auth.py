@@ -30,6 +30,7 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: str | None = None
+    user_type: str | None = None
 
 
 SECRET_KEY = os.environ.get("SECRET_KEY", "a_default_secret_key")
@@ -60,10 +61,11 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
+        username: str = payload.get("username")
+        user_type: str = payload.get("user_type")
         if username is None:
             raise credentials_exception
-        token_data = TokenData(username=username)
+        token_data = TokenData(username=username, user_type=user_type)
     except JWTError:
         raise credentials_exception
     
@@ -106,7 +108,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
+        data={"username": user.username, "user_type": user.user_type.value}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
 

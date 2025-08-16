@@ -1,7 +1,13 @@
 import bcrypt
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Enum
 from sqlalchemy.orm import relationship
 from .database import Base
+from enum import Enum
+
+
+class UserType(str, Enum):
+    USER = "USER"
+    ADMIN = "ADMIN"
 
 
 class User(Base):
@@ -9,9 +15,10 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     username = Column(String(80), unique=True, nullable=False)
     password_hash = Column(String(256))
+    user_type = Column(Enum(UserType), nullable=False, default=UserType.USER)
     highscore = relationship(
-        'Highscore', 
-        back_populates='user', 
+        'Highscore',
+        back_populates='user',
         uselist=False,
         lazy='joined'
     )
