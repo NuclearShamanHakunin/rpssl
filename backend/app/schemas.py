@@ -1,4 +1,11 @@
+from enum import Enum
 from pydantic import BaseModel
+
+
+class GameResult(str, Enum):
+    WIN = "win"
+    LOSE = "lose"
+    TIE = "tie"
 
 
 class UserCreate(BaseModel):
@@ -20,3 +27,13 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     username: str | None = None
     user_type: str | None = None
+
+
+class PlayRequest(BaseModel):
+    player: int
+
+
+class PlayResponse(BaseModel):
+    results: GameResult
+    player: int
+    computer: int
