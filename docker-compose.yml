@@ -7,6 +7,9 @@ services:
       - ./backend:/app
     environment:
       - DATABASE_URL=postgresql+asyncpg://user:password@db:5432/mydatabase
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=admin
+      - SECRET_KEY=a_very_secret_key
     profiles:
       - dev
       - prod
