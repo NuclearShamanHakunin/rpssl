@@ -36,9 +36,11 @@ This mode enables hot-reloading for both the frontend, making it ideal for devel
 This command builds the optimized frontend assets and runs the application in a production-like environment.
 
 1.  Run the following command from the project root:
+
     ```bash
     docker-compose --profile prod up --build
     ```
+    
 2.  Access the application at `http://localhost:80`.
 
 -----
@@ -49,7 +51,7 @@ The application features two distinct user roles:
 
 * **Admin User**
     * **Default Credentials**: `admin` / `admin`
-        * These can be changed during setup
+        * These can be changed during setup.
     * **Abilities**: This user is created automatically when the application starts. The admin has the unique ability to reset the high scores for all players from the main game page.
 * **Player**
     * **Abilities**: Any user can register for a new account. Once logged in, they can play the game, and their scores will be tracked on the leaderboard.
