@@ -32,7 +32,7 @@ const Scoreboard: React.FC = () => {
         setIsLoading(true);
         setError('');
         try {
-            const response = await fetch('/api/gamehistory');
+            const response = await fetch('/rpssl/api/gamehistory');
             if (!response.ok) {
                 throw new Error('Failed to fetch game history.');
             }
