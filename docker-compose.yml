@@ -3,6 +3,7 @@ services:
     build: ./backend
     ports:
       - "5000:5000"
+    restart: "unless-stopped"
     volumes:
       - ./backend:/app
     environment:
@@ -20,6 +21,7 @@ services:
       target: build
     ports:
       - "3000:3000"
+    restart: "unless-stopped"
     volumes:
       - ./frontend/src:/app/src
     command: npm start
@@ -36,6 +38,7 @@ services:
 
   db:
     image: postgres:13
+    restart: "unless-stopped"
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
