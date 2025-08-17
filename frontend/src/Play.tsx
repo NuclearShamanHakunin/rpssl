@@ -50,7 +50,7 @@ const Play: React.FC = () => {
     useEffect(() => {
         const fetchChoices = async () => {
             try {
-                const response = await fetch('/api/choices');
+                const response = await fetch('/rpssl/api/choices');
                 if (!response.ok) {
                     throw new Error('Failed to fetch choices from the server.');
                 }
@@ -75,7 +75,7 @@ const Play: React.FC = () => {
         setError('');
 
         try {
-            const response = await fetch('/api/play', {
+            const response = await fetch('/rpssl/api/play', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -102,7 +102,7 @@ const Play: React.FC = () => {
     const handleHintClick = async () => {
         setIsHintLoading(true);
         try {
-            const response = await fetch('/api/choice');
+            const response = await fetch('/rpssl/api/choice');
             if (!response.ok) {
                 throw new Error('Could not get a hint from the server.');
             }

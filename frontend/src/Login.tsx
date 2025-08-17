@@ -22,7 +22,7 @@ const Login: React.FC = () => {
             formData.append('password', password);
 
             try {
-                const response = await fetch('/api/token', {
+                const response = await fetch('/rpssl/api/token', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
@@ -41,7 +41,7 @@ const Login: React.FC = () => {
             }
         } else {
             try {
-                const response = await fetch('/api/register', {
+                const response = await fetch('/rpssl/api/register', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

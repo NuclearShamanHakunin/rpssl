@@ -81,7 +81,7 @@ const App: React.FC = () => {
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline />
-            <Router>
+            <Router basename="/rpssl">
                 <Navbar />
                 <main>
                     <Routes>

@@ -53,7 +53,7 @@ const Leaderboard: React.FC = () => {
         setIsLoading(true);
         setError('');
         try {
-            const response = await fetch('/api/highscores');
+            const response = await fetch('/rpssl/api/highscores');
             if (!response.ok) {
                 throw new Error('Failed to fetch highscores.');
             }
@@ -74,7 +74,7 @@ const Leaderboard: React.FC = () => {
     const handleReset = async () => {
         const token = localStorage.getItem('token');
         try {
-            const response = await fetch('/api/highscores/reset', {
+            const response = await fetch('/rpssl/api/highscores/reset', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

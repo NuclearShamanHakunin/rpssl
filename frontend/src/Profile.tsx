@@ -22,7 +22,7 @@ const Profile: React.FC = () => {
             }
 
             try {
-                const response = await fetch('/api/profile', {
+                const response = await fetch('/rpssl/api/profile', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                     },
