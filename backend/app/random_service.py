@@ -36,4 +36,4 @@ async def get_random_number() -> int:
                 await asyncio.sleep(RETRY_TIMER_SECONDS)
                 continue
 
-        raise RandomServiceError("Failed to get random number after 3 attempts.")
+        raise RandomServiceError("Random number service unavailable, please try again.")
