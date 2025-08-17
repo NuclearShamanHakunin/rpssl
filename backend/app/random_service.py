@@ -24,7 +24,7 @@ async def get_random_number() -> int:
                 data = response.json()
                 random_number_obj = RandomNumber(**data)
                 return random_number_obj.random_number
-            except (httpx.RequestError, ValidationError, json.JSONDecodeError):
+            except (httpx.RequestError, ValidationError, json.JSONDecodeError, httpx.HTTPStatusError):
                 await asyncio.sleep(RETRY_TIMER_SECONDS)
                 continue
 
