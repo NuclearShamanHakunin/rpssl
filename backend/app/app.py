@@ -37,8 +37,3 @@ async def startup():
             session.add(new_highscore)
 
             await session.commit()
-
-
-@app.get("/api")
-def hello():
-    return "Hello from the backend!"

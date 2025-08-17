@@ -2,11 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import Column, Integer, ForeignKey, desc
 from sqlalchemy.orm import relationship
 from sqlalchemy.future import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from .schemas import UserType
 from .database import Base, get_db
 from .user import User, get_current_user
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 router = APIRouter()
