@@ -37,6 +37,20 @@ class User(Base):
         )
 
 
+class UserRepository:
+    def __init__(self, db: AsyncSession):
+        self.db = db
+
+    async def get_by_username(self, username: str) -> User | None:
+        result = await self.db.execute(select(User).where(User.username == username))
+        return result.scalars().first()
+
+    async def create(self, user: "User") -> "User":
+        self.db.add(user)
+        await self.db.flush()
+        return user
+
+
 async def get_current_user(
     token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)
 ):
@@ -55,8 +69,8 @@ async def get_current_user(
     except JWTError:
         raise credentials_exception
 
-    result = await db.execute(select(User).where(User.username == token_data.username))
-    user = result.scalars().first()
+    repo = UserRepository(db)
+    user = await repo.get_by_username(token_data.username)
 
     if user is None:
         raise credentials_exception

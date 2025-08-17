@@ -1,12 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import update
 
 from .random_service import RandomServiceError, get_random_number
 from .schemas import PlayRequest, PlayResponse, GameResult
 from .user import User, get_current_user
 from .database import get_db
-from .highscore import Highscore
+from .highscore import HighscoreRepository
 
 
 router = APIRouter()
@@ -74,13 +73,16 @@ async def play(
     result = calculate_winner(play_request.player, computer_choice)
 
     if result != GameResult.TIE:
-        column_to_update = "wins" if result == GameResult.WIN else "losses"
+        repo = HighscoreRepository(db)
+        highscore = await repo.get_by_user_id(current_user.id)
+        if not highscore:
+            raise HTTPException(status_code=404, detail="Highscore not found for user")
 
-        await db.execute(
-            update(Highscore)
-            .where(Highscore.user_id == current_user.id)
-            .values({column_to_update: getattr(Highscore, column_to_update) + 1})
-        )
+        if result == GameResult.WIN:
+            highscore.add_win()
+        else:
+            highscore.add_loss()
+
         await db.commit()
 
     return {

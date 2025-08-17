@@ -1,12 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
 from jose import jwt
 from datetime import datetime, timedelta
 
 from .database import get_db
-from .user import User
+from .user import User, UserRepository
 from .highscore import Highscore
 from .config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 from .schemas import UserCreate, Token
@@ -28,15 +27,14 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 async def register(user: UserCreate, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(User).where(User.username == user.username))
-    db_user = result.scalars().first()
+    repo = UserRepository(db)
+    db_user = await repo.get_by_username(user.username)
     if db_user:
         raise HTTPException(status_code=400, detail="Username already exists")
 
     new_user = User(username=user.username)
     new_user.set_password(user.password)
-    db.add(new_user)
-    await db.flush()
+    new_user = await repo.create(new_user)
 
     new_highscore = Highscore(user_id=new_user.id)
     db.add(new_highscore)
@@ -49,8 +47,8 @@ async def register(user: UserCreate, db: AsyncSession = Depends(get_db)):
 async def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)
 ):
-    result = await db.execute(select(User).where(User.username == form_data.username))
-    user = result.scalars().first()
+    repo = UserRepository(db)
+    user = await repo.get_by_username(form_data.username)
     if not user or not user.check_password(form_data.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

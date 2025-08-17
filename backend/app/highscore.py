@@ -26,10 +26,14 @@ class Highscore(Base):
     def add_loss(self):
         self.losses += 1
 
-    @staticmethod
-    async def get_top(db: AsyncSession, limit: int = 10):
+
+class HighscoreRepository:
+    def __init__(self, db: AsyncSession):
+        self.db = db
+
+    async def get_top(self, limit: int = 10):
         try:
-            result = await db.execute(
+            result = await self.db.execute(
                 select(Highscore)
                 .join(User)
                 .order_by(desc(Highscore.wins - Highscore.losses))
@@ -39,20 +43,26 @@ class Highscore(Base):
         except Exception:
             return None
 
-    @staticmethod
-    async def reset_all(db: AsyncSession):
+    async def reset_all(self):
         try:
-            await db.execute(Highscore.__table__.update().values(wins=0, losses=0))
-            await db.commit()
+            await self.db.execute(Highscore.__table__.update().values(wins=0, losses=0))
+            await self.db.commit()
             return True
         except Exception:
-            await db.rollback()
+            await self.db.rollback()
             return False
+
+    async def get_by_user_id(self, user_id: int) -> Highscore | None:
+        result = await self.db.execute(
+            select(Highscore).where(Highscore.user_id == user_id)
+        )
+        return result.scalars().first()
 
 
 @router.get("/highscores")
 async def get_highscores(limit: int = 10, db: AsyncSession = Depends(get_db)):
-    highscores_data = await Highscore.get_top(db, limit)
+    repo = HighscoreRepository(db)
+    highscores_data = await repo.get_top(limit)
     if highscores_data is None:
         raise HTTPException(status_code=500, detail="Failed to retrieve highscores.")
 
@@ -70,7 +80,8 @@ async def reset_highscores(
         raise HTTPException(
             status_code=403, detail="Not authorized to reset highscores"
         )
-    if await Highscore.reset_all(db):
+    repo = HighscoreRepository(db)
+    if await repo.reset_all():
         return {"msg": "All highscores have been reset."}
     else:
         raise HTTPException(status_code=500, detail="Failed to reset highscores.")
