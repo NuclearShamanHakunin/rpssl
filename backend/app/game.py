@@ -5,8 +5,8 @@ from .random_service import RandomServiceError, get_random_number
 from .schemas import PlayRequest, PlayResponse, GameResult
 from .user import User, get_current_user
 from .database import get_db
-from .highscore import HighscoreRepository
-from .game_history import GameHistoryRepository
+from .highscore import HighscoreRepository, get_highscore_repo
+from .game_history import GameHistoryRepository, get_game_history_repo
 
 
 router = APIRouter()
@@ -65,6 +65,8 @@ async def play(
     play_request: PlayRequest,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    game_history_repo: GameHistoryRepository = Depends(get_game_history_repo),
+    highscore_repo: HighscoreRepository = Depends(get_highscore_repo),
 ):
     try:
         computer_choice = await get_random_number() % len(VALID_CHOICES)
@@ -85,12 +87,10 @@ async def play(
 
     result_string = f"{current_user.username} vs Computer - {player_choice_name} vs {computer_choice_name} - {outcome}"
 
-    game_history_repo = GameHistoryRepository(db)
     await game_history_repo.add_game_history(current_user.id, result_string)
 
     if result != GameResult.TIE:
-        repo = HighscoreRepository(db)
-        highscore = await repo.get_by_user_id(current_user.id)
+        highscore = await highscore_repo.get_by_user_id(current_user.id)
         if not highscore:
             raise HTTPException(status_code=404, detail="Highscore not found for user")
 

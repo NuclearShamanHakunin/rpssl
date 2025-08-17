@@ -59,7 +59,7 @@ class GameHistoryRepository:
         self.db.add(new_history)
         await self.db.flush()
         return new_history
-    
+
     async def reset_all(self):
         try:
             await self.db.execute(delete(GameHistory))
@@ -70,9 +70,14 @@ class GameHistoryRepository:
             return False
 
 
+def get_game_history_repo(db: AsyncSession = Depends(get_db)) -> GameHistoryRepository:
+    return GameHistoryRepository(db)
+
+
 @router.get("/gamehistory")
-async def get_game_history(db: AsyncSession = Depends(get_db)):
-    repo = GameHistoryRepository(db)
+async def get_game_history(
+    repo: GameHistoryRepository = Depends(get_game_history_repo),
+):
     history_data = await repo.get_last_10_global()
     if not history_data:
         return []
@@ -80,12 +85,11 @@ async def get_game_history(db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/gamehistory/reset")
-async def reset_game_history(db: AsyncSession = Depends(get_db)):
-    repo = GameHistoryRepository(db)
+async def reset_game_history(
+    repo: GameHistoryRepository = Depends(get_game_history_repo),
+):
     success = await repo.reset_all()
     if success:
         return {"message": "Game history has been successfully reset."}
     else:
-        raise HTTPException(
-            status_code=500, detail="Failed to reset game history."
-        )
+        raise HTTPException(status_code=500, detail="Failed to reset game history.")

@@ -59,9 +59,15 @@ class HighscoreRepository:
         return result.scalars().first()
 
 
+def get_highscore_repo(db: AsyncSession = Depends(get_db)) -> HighscoreRepository:
+    return HighscoreRepository(db)
+
+
 @router.get("/highscores")
-async def get_highscores(limit: int = 10, db: AsyncSession = Depends(get_db)):
-    repo = HighscoreRepository(db)
+async def get_highscores(
+    limit: int = 10,
+    repo: HighscoreRepository = Depends(get_highscore_repo),
+):
     highscores_data = await repo.get_top(limit)
     if highscores_data is None:
         raise HTTPException(status_code=500, detail="Failed to retrieve highscores.")
@@ -74,13 +80,13 @@ async def get_highscores(limit: int = 10, db: AsyncSession = Depends(get_db)):
 
 @router.post("/highscores/reset")
 async def reset_highscores(
-    db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)
+    repo: HighscoreRepository = Depends(get_highscore_repo),
+    current_user: User = Depends(get_current_user),
 ):
     if current_user.user_type != UserType.ADMIN:
         raise HTTPException(
             status_code=403, detail="Not authorized to reset highscores"
         )
-    repo = HighscoreRepository(db)
     if await repo.reset_all():
         return {"msg": "All highscores have been reset."}
     else:

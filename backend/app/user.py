@@ -52,8 +52,13 @@ class UserRepository:
         return user
 
 
+def get_user_repo(db: AsyncSession = Depends(get_db)) -> UserRepository:
+    return UserRepository(db)
+
+
 async def get_current_user(
-    token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)
+    token: str = Depends(oauth2_scheme),
+    repo: UserRepository = Depends(get_user_repo),
 ):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -70,7 +75,6 @@ async def get_current_user(
     except JWTError:
         raise credentials_exception
 
-    repo = UserRepository(db)
     user = await repo.get_by_username(token_data.username)
 
     if user is None:
