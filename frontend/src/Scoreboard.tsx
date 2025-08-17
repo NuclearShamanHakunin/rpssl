@@ -53,7 +53,7 @@ const Scoreboard: React.FC = () => {
     const handleReset = async () => {
         const token = localStorage.getItem('token');
         try {
-            const response = await fetch('/api/gamehistory/reset', {
+            const response = await fetch('/rpssl/api/gamehistory/reset', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
