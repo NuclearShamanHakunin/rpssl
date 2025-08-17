@@ -1,20 +1,20 @@
 import React from 'react';
-import { 
-    BrowserRouter as Router, 
-    Routes, 
-    Route, 
+import {
+    BrowserRouter as Router,
+    Routes,
+    Route,
     Link,
-    useNavigate, 
-    Navigate 
+    useNavigate,
+    Navigate
 } from 'react-router-dom';
-import { 
-    AppBar, 
-    Toolbar, 
-    Typography, 
-    Button, 
-    CssBaseline, 
-    createTheme, 
-    ThemeProvider 
+import {
+    AppBar,
+    Toolbar,
+    Typography,
+    Button,
+    CssBaseline,
+    createTheme,
+    ThemeProvider
 } from '@mui/material';
 
 import Login from './Login';
@@ -24,28 +24,28 @@ import Leaderboard from './Leaderboard';
 import Home from './Home';
 
 const theme = createTheme({
-  palette: {
-    mode: 'dark',
-  },  
+    palette: {
+        mode: 'dark',
+    },
 });
 
 
 interface PrivateRouteProps {
-  children: React.ReactNode;
+    children: React.ReactNode;
 }
 
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-  const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token');
 
-  return token ? <>{children}</> : <Navigate to="/login" />;
+    return token ? <>{children}</> : <Navigate to="/login" />;
 };
 
 
 const Navbar: React.FC = () => {
     const navigate = useNavigate();
     const token = localStorage.getItem('token');
-    
+
     const handleLogout = () => {
         localStorage.removeItem('token');
         navigate('/login');
