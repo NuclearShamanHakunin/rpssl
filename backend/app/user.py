@@ -17,26 +17,29 @@ router = APIRouter()
 
 
 class User(Base):
-    __tablename__ = 'user'
+    __tablename__ = "user"
     id = Column(Integer, primary_key=True)
     username = Column(String(80), unique=True, nullable=False)
     password_hash = Column(String(256))
     user_type = Column(SQLAlchemyEnum(UserType), nullable=False, default=UserType.USER)
     highscore = relationship(
-        'Highscore',
-        back_populates='user',
-        uselist=False,
-        lazy='joined'
+        "Highscore", back_populates="user", uselist=False, lazy="joined"
     )
 
     def set_password(self, password: str):
-        self.password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        self.password_hash = bcrypt.hashpw(
+            password.encode("utf-8"), bcrypt.gensalt()
+        ).decode("utf-8")
 
     def check_password(self, password: str):
-        return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
+        return bcrypt.checkpw(
+            password.encode("utf-8"), self.password_hash.encode("utf-8")
+        )
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)):
+async def get_current_user(
+    token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)
+):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -51,7 +54,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
         token_data = TokenData(username=username, user_type=user_type)
     except JWTError:
         raise credentials_exception
-    
+
     result = await db.execute(select(User).where(User.username == token_data.username))
     user = result.scalars().first()
 

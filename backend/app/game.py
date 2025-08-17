@@ -15,33 +15,30 @@ router = APIRouter()
 VALID_CHOICES = [
     {
         "id": 0,
-        "name": "rock", 
+        "name": "rock",
     },
     {
         "id": 1,
-        "name": "paper", 
+        "name": "paper",
     },
     {
         "id": 2,
-        "name": "scissors", 
+        "name": "scissors",
     },
     {
         "id": 3,
-        "name": "lizard", 
+        "name": "lizard",
     },
-    {
-        "id": 4,
-        "name": "spock"
-    },
+    {"id": 4, "name": "spock"},
 ]
 
 
 GAME_LOGIC = [
-    [GameResult.TIE,  GameResult.LOSE, GameResult.WIN,  GameResult.WIN,  GameResult.LOSE],    
-    [GameResult.WIN,  GameResult.TIE,  GameResult.LOSE, GameResult.LOSE, GameResult.WIN ],
-    [GameResult.LOSE, GameResult.WIN,  GameResult.TIE,  GameResult.WIN,  GameResult.LOSE],
-    [GameResult.LOSE, GameResult.WIN,  GameResult.LOSE, GameResult.TIE,  GameResult.WIN ],
-    [GameResult.WIN, GameResult.LOSE,  GameResult.WIN,  GameResult.LOSE, GameResult.TIE ]
+    [GameResult.TIE, GameResult.LOSE, GameResult.WIN, GameResult.WIN, GameResult.LOSE],
+    [GameResult.WIN, GameResult.TIE, GameResult.LOSE, GameResult.LOSE, GameResult.WIN],
+    [GameResult.LOSE, GameResult.WIN, GameResult.TIE, GameResult.WIN, GameResult.LOSE],
+    [GameResult.LOSE, GameResult.WIN, GameResult.LOSE, GameResult.TIE, GameResult.WIN],
+    [GameResult.WIN, GameResult.LOSE, GameResult.WIN, GameResult.LOSE, GameResult.TIE],
 ]
 
 
@@ -77,14 +74,12 @@ async def play(
     result = calculate_winner(play_request.player, computer_choice)
 
     if result != GameResult.TIE:
-        column_to_update = (
-            "wins" if result == GameResult.WIN else "losses"
-        )
-        
+        column_to_update = "wins" if result == GameResult.WIN else "losses"
+
         await db.execute(
             update(Highscore)
-                .where(Highscore.user_id == current_user.id)
-                .values({column_to_update: getattr(Highscore, column_to_update) + 1})
+            .where(Highscore.user_id == current_user.id)
+            .values({column_to_update: getattr(Highscore, column_to_update) + 1})
         )
         await db.commit()
 

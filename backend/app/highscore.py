@@ -5,13 +5,14 @@ from .database import Base
 from .user import User
 from sqlalchemy.ext.asyncio import AsyncSession
 
+
 class Highscore(Base):
-    __tablename__ = 'highscore'
+    __tablename__ = "highscore"
     id = Column(Integer, primary_key=True)
     wins = Column(Integer, default=0)
     losses = Column(Integer, default=0)
-    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
-    user = relationship('User', back_populates='highscore', lazy='joined')
+    user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
+    user = relationship("User", back_populates="highscore", lazy="joined")
 
     def add_win(self):
         self.wins += 1
@@ -35,9 +36,7 @@ class Highscore(Base):
     @staticmethod
     async def reset_all(db: AsyncSession):
         try:
-            await db.execute(
-                Highscore.__table__.update().values(wins=0, losses=0)
-            )
+            await db.execute(Highscore.__table__.update().values(wins=0, losses=0))
             await db.commit()
             return True
         except Exception:

@@ -40,13 +40,15 @@ async def register(user: UserCreate, db: AsyncSession = Depends(get_db)):
 
     new_highscore = Highscore(user_id=new_user.id)
     db.add(new_highscore)
-    
+
     await db.commit()
     return {"msg": "User created successfully"}
 
 
 @router.post("/token", response_model=Token)
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
+async def login_for_access_token(
+    form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)
+):
     result = await db.execute(select(User).where(User.username == form_data.username))
     user = result.scalars().first()
     if not user or not user.check_password(form_data.password):
@@ -57,6 +59,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"username": user.username, "user_type": user.user_type.value}, expires_delta=access_token_expires
+        data={"username": user.username, "user_type": user.user_type.value},
+        expires_delta=access_token_expires,
     )
     return {"access_token": access_token, "token_type": "bearer"}

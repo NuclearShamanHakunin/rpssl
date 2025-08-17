@@ -22,7 +22,9 @@ async def startup():
         await conn.run_sync(Base.metadata.create_all)
 
     async with SessionLocal() as session:
-        result = await session.execute(select(User).where(User.username == ADMIN_USERNAME))
+        result = await session.execute(
+            select(User).where(User.username == ADMIN_USERNAME)
+        )
         db_user = result.scalars().first()
         if not db_user:
             admin_user = User(username=ADMIN_USERNAME, user_type=UserType.ADMIN)
@@ -46,20 +48,21 @@ async def get_highscores(limit: int = 10, db: AsyncSession = Depends(get_db)):
     highscores_data = await Highscore.get_top(db, limit)
     if highscores_data is None:
         raise HTTPException(status_code=500, detail="Failed to retrieve highscores.")
-    
+
     return [
-        {
-            "username": hs.user.username,
-            "wins": hs.wins,
-            "losses": hs.losses
-        } for hs in highscores_data
+        {"username": hs.user.username, "wins": hs.wins, "losses": hs.losses}
+        for hs in highscores_data
     ]
 
 
 @app.post("/highscores/reset")
-async def reset_highscores(db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def reset_highscores(
+    db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)
+):
     if current_user.user_type != UserType.ADMIN:
-        raise HTTPException(status_code=403, detail="Not authorized to reset highscores")
+        raise HTTPException(
+            status_code=403, detail="Not authorized to reset highscores"
+        )
     if await Highscore.reset_all(db):
         return {"msg": "All highscores have been reset."}
     else:
