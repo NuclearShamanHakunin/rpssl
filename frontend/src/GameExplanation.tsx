@@ -22,11 +22,11 @@ enum GameResult {
 }
 
 const choiceImages: { [key: string]: string } = {
-    rock: 'resources/rock.png',
-    paper: 'resources/paper.png',
-    scissors: 'resources/scissors.png',
-    lizard: 'resources/lizard.png',
-    spock: 'resources/spock.png',
+    rock: '/rock.png',
+    paper: '/paper.png',
+    scissors: '/scissors.png',
+    lizard: '/lizard.png',
+    spock: '/spock.png',
 };
 
 const GAME_LOGIC: GameResult[][] = [
