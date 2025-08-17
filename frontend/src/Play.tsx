@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    Container, 
-    Box, 
-    Typography, 
-    CircularProgress, 
-    Alert, 
-    Paper, 
-    Grid, 
-    Button, 
-    Dialog, 
-    DialogActions, 
-    DialogContent, 
+import {
+    Container,
+    Box,
+    Typography,
+    CircularProgress,
+    Alert,
+    Paper,
+    Grid,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
     DialogTitle,
     Backdrop
 } from '@mui/material';
@@ -137,13 +137,13 @@ const Play: React.FC = () => {
             lose: '😢 You Lose 😢',
             tie: '🤝 It\'s a Tie! 🤝'
         }[gameResult.results];
-        
+
         if (!playerChoice || !computerChoice) {
             return <Alert severity="error">Could not display results. Data is missing.</Alert>;
         }
 
         return (
-             <Box>
+            <Box>
                 <Typography variant="h4" component="h2" gutterBottom align="center">
                     {resultText}
                 </Typography>
@@ -152,7 +152,7 @@ const Play: React.FC = () => {
                         <Typography variant="h6">You Chose</Typography>
                         <Paper elevation={3} sx={{ p: 2, display: 'inline-block' }}>
                             <img src={choiceImages[playerChoice.name.toLowerCase()]} alt={playerChoice.name} style={{ width: 120, height: 120 }} />
-                            <Typography variant="body1" sx={{textTransform: 'capitalize'}}>{playerChoice.name}</Typography>
+                            <Typography variant="body1" sx={{ textTransform: 'capitalize' }}>{playerChoice.name}</Typography>
                         </Paper>
                     </Grid>
                     <Grid textAlign="center">
@@ -160,9 +160,9 @@ const Play: React.FC = () => {
                     </Grid>
                     <Grid textAlign="center">
                         <Typography variant="h6">Computer Chose</Typography>
-                         <Paper elevation={3} sx={{ p: 2, display: 'inline-block' }}>
+                        <Paper elevation={3} sx={{ p: 2, display: 'inline-block' }}>
                             <img src={choiceImages[computerChoice.name.toLowerCase()]} alt={computerChoice.name} style={{ width: 120, height: 120 }} />
-                            <Typography variant="body1" sx={{textTransform: 'capitalize'}}>{computerChoice.name}</Typography>
+                            <Typography variant="body1" sx={{ textTransform: 'capitalize' }}>{computerChoice.name}</Typography>
                         </Paper>
                     </Grid>
                 </Grid>
@@ -238,7 +238,7 @@ const Play: React.FC = () => {
             <Dialog open={isResultModalOpen} onClose={handleCloseResultModal} maxWidth="sm" fullWidth>
                 <DialogTitle>Round Result</DialogTitle>
                 <DialogContent>
-                   {renderResultContent()}
+                    {renderResultContent()}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseResultModal} variant="contained">Play Again</Button>

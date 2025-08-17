@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    Container, 
-    Box, 
-    Typography, 
-    CircularProgress, 
-    Alert, 
-    Paper, 
-    Grid 
+import {
+    Container,
+    Box,
+    Typography,
+    CircularProgress,
+    Alert,
+    Paper,
+    Grid
 } from '@mui/material';
 
 
@@ -30,11 +30,11 @@ const choiceImages: { [key: string]: string } = {
 };
 
 const GAME_LOGIC: GameResult[][] = [
-    [GameResult.TIE, GameResult.LOSE, GameResult.WIN,  GameResult.WIN,  GameResult.LOSE],
-    [GameResult.WIN, GameResult.TIE,  GameResult.LOSE, GameResult.LOSE, GameResult.WIN ],
-    [GameResult.LOSE,GameResult.WIN,  GameResult.TIE,  GameResult.WIN,  GameResult.LOSE],
-    [GameResult.LOSE,GameResult.WIN,  GameResult.LOSE, GameResult.TIE,  GameResult.WIN ],
-    [GameResult.WIN, GameResult.LOSE, GameResult.WIN,  GameResult.LOSE, GameResult.TIE ]
+    [GameResult.TIE, GameResult.LOSE, GameResult.WIN, GameResult.WIN, GameResult.LOSE],
+    [GameResult.WIN, GameResult.TIE, GameResult.LOSE, GameResult.LOSE, GameResult.WIN],
+    [GameResult.LOSE, GameResult.WIN, GameResult.TIE, GameResult.WIN, GameResult.LOSE],
+    [GameResult.LOSE, GameResult.WIN, GameResult.LOSE, GameResult.TIE, GameResult.WIN],
+    [GameResult.WIN, GameResult.LOSE, GameResult.WIN, GameResult.LOSE, GameResult.TIE]
 ];
 
 const GameExplanation: React.FC = () => {

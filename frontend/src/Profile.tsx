@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    Container, 
-    Box, 
-    Typography, Stack, Paper, Alert, CircularProgress } from '@mui/material';
+import {
+    Container,
+    Box,
+    Typography, 
+    Stack, 
+    Paper,
+    Alert, 
+    CircularProgress
+} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 const Profile: React.FC = () => {
