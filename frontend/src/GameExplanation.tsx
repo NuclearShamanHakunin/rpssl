@@ -46,7 +46,7 @@ const GameExplanation: React.FC = () => {
     useEffect(() => {
         const fetchChoices = async () => {
             try {
-                const response = await fetch('/api/choices');
+                const response = await fetch('/rpssl/api/choices');
                 if (!response.ok) {
                     throw new Error('Failed to fetch game choices from the server.');
                 }
