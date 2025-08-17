@@ -14,37 +14,19 @@ import {
     TableRow,
     Button
 } from '@mui/material';
+import { TokenData, decodeToken } from './token';
+
 
 interface GameHistory {
     result: string;
 }
 
 
-interface TokenData {
-    username: string;
-    user_type: 'USER' | 'ADMIN';
-}
-
 const Scoreboard: React.FC = () => {
     const [gameHistory, setGameHistory] = useState<GameHistory[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<string>('');
     const [currentUser, setCurrentUser] = useState<TokenData | null>(null);
-
-    const decodeToken = (): TokenData | null => {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            return null;
-        }
-        try {
-            const payloadBase64 = token.split('.')[1];
-            const decodedPayload = atob(payloadBase64);
-            return JSON.parse(decodedPayload) as TokenData;
-        } catch (error) {
-            console.error("Failed to decode token:", error);
-            return null;
-        }
-    };
 
     const fetchGameHistory = async () => {
         setIsLoading(true);

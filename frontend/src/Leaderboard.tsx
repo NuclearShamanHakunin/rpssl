@@ -14,6 +14,7 @@ import {
     TableRow,
     Button,
 } from '@mui/material';
+import { TokenData, decodeToken } from './token';
 
 
 interface Highscore {
@@ -21,26 +22,6 @@ interface Highscore {
     wins: number;
     losses: number;
 }
-
-interface TokenData {
-    username: string;
-    user_type: 'USER' | 'ADMIN';
-}
-
-const decodeToken = (): TokenData | null => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-        return null;
-    }
-    try {
-        const payloadBase64 = token.split('.')[1];
-        const decodedPayload = atob(payloadBase64);
-        return JSON.parse(decodedPayload) as TokenData;
-    } catch (error) {
-        console.error("Failed to decode token:", error);
-        return null;
-    }
-};
 
 
 const Leaderboard: React.FC = () => {
