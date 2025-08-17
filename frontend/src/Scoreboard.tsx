@@ -12,34 +12,32 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    Button,
+    Button
 } from '@mui/material';
 import { TokenData, decodeToken } from './token';
 
 
-interface Highscore {
-    username: string;
-    wins: number;
-    losses: number;
+interface GameHistory {
+    result: string;
 }
 
 
-const Leaderboard: React.FC = () => {
-    const [scores, setScores] = useState<Highscore[]>([]);
-    const [currentUser, setCurrentUser] = useState<TokenData | null>(null);
+const Scoreboard: React.FC = () => {
+    const [gameHistory, setGameHistory] = useState<GameHistory[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<string>('');
+    const [currentUser, setCurrentUser] = useState<TokenData | null>(null);
 
-    const fetchHighscores = async () => {
+    const fetchGameHistory = async () => {
         setIsLoading(true);
         setError('');
         try {
-            const response = await fetch('/rpssl/api/highscores');
+            const response = await fetch('/api/gamehistory');
             if (!response.ok) {
-                throw new Error('Failed to fetch highscores.');
+                throw new Error('Failed to fetch game history.');
             }
-            const data: Highscore[] = await response.json();
-            setScores(data);
+            const data: GameHistory[] = await response.json();
+            setGameHistory(data);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An unknown error occurred.');
         } finally {
@@ -48,24 +46,24 @@ const Leaderboard: React.FC = () => {
     };
 
     useEffect(() => {
+        fetchGameHistory();
         setCurrentUser(decodeToken());
-        fetchHighscores();
     }, []);
 
     const handleReset = async () => {
         const token = localStorage.getItem('token');
         try {
-            const response = await fetch('/rpssl/api/highscores/reset', {
+            const response = await fetch('/api/gamehistory/reset', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 },
             });
             if (!response.ok) {
-                throw new Error('Failed to reset leaderboard.');
+                throw new Error('Failed to reset scoreboard.');
             }
 
-            fetchHighscores();
+            fetchGameHistory();
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred during reset.');
         }
@@ -82,7 +80,7 @@ const Leaderboard: React.FC = () => {
                 }}
             >
                 <Typography component="h1" variant="h4" gutterBottom>
-                    Leaderboard
+                    Scoreboard
                 </Typography>
 
                 {currentUser?.user_type === 'ADMIN' && (
@@ -97,35 +95,18 @@ const Leaderboard: React.FC = () => {
                     <Alert severity="error" sx={{ width: '100%', mt: 4 }}>{error}</Alert>
                 ) : (
                     <TableContainer component={Paper} sx={{ maxHeight: 600 }}>
-                        <Table stickyHeader aria-label="leaderboard table">
+                        <Table stickyHeader aria-label="scoreboard table">
                             <TableHead>
                                 <TableRow>
-                                    <TableCell>Rank</TableCell>
-                                    <TableCell>Username</TableCell>
-                                    <TableCell align="right">Wins</TableCell>
-                                    <TableCell align="right">Losses</TableCell>
+                                    <TableCell>Game Result</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {scores.map((score, index) => {
-                                    const isCurrentUser = score.username === currentUser?.username;
-                                    return (
-                                        <TableRow
-                                            key={score.username}
-                                            sx={{
-                                                backgroundColor: isCurrentUser ? 'action.hover' : 'inherit',
-                                                '&:last-child td, &:last-child th': { border: 0 },
-                                            }}
-                                        >
-                                            <TableCell component="th" scope="row">
-                                                {index + 1}
-                                            </TableCell>
-                                            <TableCell>{score.username}</TableCell>
-                                            <TableCell align="right">{score.wins}</TableCell>
-                                            <TableCell align="right">{score.losses}</TableCell>
-                                        </TableRow>
-                                    );
-                                })}
+                                {gameHistory.map((game, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell>{game.result}</TableCell>
+                                    </TableRow>
+                                ))}
                             </TableBody>
                         </Table>
                     </TableContainer>
@@ -135,4 +116,4 @@ const Leaderboard: React.FC = () => {
     );
 };
 
-export default Leaderboard;
+export default Scoreboard;

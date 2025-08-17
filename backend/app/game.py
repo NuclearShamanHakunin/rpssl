@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import update
 
 from .random_service import RandomServiceError, get_random_number
 from .schemas import PlayRequest, PlayResponse, GameResult
 from .user import User, get_current_user
 from .database import get_db
-from .highscore import Highscore
+from .highscore import HighscoreRepository, get_highscore_repo
+from .game_history import GameHistoryRepository, get_game_history_repo
 
 
 router = APIRouter()
@@ -15,33 +15,30 @@ router = APIRouter()
 VALID_CHOICES = [
     {
         "id": 0,
-        "name": "rock", 
+        "name": "rock",
     },
     {
         "id": 1,
-        "name": "paper", 
+        "name": "paper",
     },
     {
         "id": 2,
-        "name": "scissors", 
+        "name": "scissors",
     },
     {
         "id": 3,
-        "name": "lizard", 
+        "name": "lizard",
     },
-    {
-        "id": 4,
-        "name": "spock"
-    },
+    {"id": 4, "name": "spock"},
 ]
 
 
 GAME_LOGIC = [
-    [GameResult.TIE,  GameResult.LOSE, GameResult.WIN,  GameResult.WIN,  GameResult.LOSE],    
-    [GameResult.WIN,  GameResult.TIE,  GameResult.LOSE, GameResult.LOSE, GameResult.WIN ],
-    [GameResult.LOSE, GameResult.WIN,  GameResult.TIE,  GameResult.WIN,  GameResult.LOSE],
-    [GameResult.LOSE, GameResult.WIN,  GameResult.LOSE, GameResult.TIE,  GameResult.WIN ],
-    [GameResult.WIN, GameResult.LOSE,  GameResult.WIN,  GameResult.LOSE, GameResult.TIE ]
+    [GameResult.TIE, GameResult.LOSE, GameResult.WIN, GameResult.WIN, GameResult.LOSE],
+    [GameResult.WIN, GameResult.TIE, GameResult.LOSE, GameResult.LOSE, GameResult.WIN],
+    [GameResult.LOSE, GameResult.WIN, GameResult.TIE, GameResult.WIN, GameResult.LOSE],
+    [GameResult.LOSE, GameResult.WIN, GameResult.LOSE, GameResult.TIE, GameResult.WIN],
+    [GameResult.WIN, GameResult.LOSE, GameResult.WIN, GameResult.LOSE, GameResult.TIE],
 ]
 
 
@@ -68,6 +65,8 @@ async def play(
     play_request: PlayRequest,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
+    game_history_repo: GameHistoryRepository = Depends(get_game_history_repo),
+    highscore_repo: HighscoreRepository = Depends(get_highscore_repo),
 ):
     try:
         computer_choice = await get_random_number() % len(VALID_CHOICES)
@@ -76,17 +75,31 @@ async def play(
 
     result = calculate_winner(play_request.player, computer_choice)
 
+    player_choice_name = VALID_CHOICES[play_request.player]["name"]
+    computer_choice_name = VALID_CHOICES[computer_choice]["name"]
+
+    if result == GameResult.WIN:
+        outcome = f"{current_user.username} won"
+    elif result == GameResult.LOSE:
+        outcome = "Computer won"
+    else:
+        outcome = "Tie"
+
+    result_string = f"{current_user.username} vs Computer - {player_choice_name} vs {computer_choice_name} - {outcome}"
+
+    await game_history_repo.add_game_history(current_user.id, result_string)
+
     if result != GameResult.TIE:
-        column_to_update = (
-            "wins" if result == GameResult.WIN else "losses"
-        )
-        
-        await db.execute(
-            update(Highscore)
-                .where(Highscore.user_id == current_user.id)
-                .values({column_to_update: getattr(Highscore, column_to_update) + 1})
-        )
-        await db.commit()
+        highscore = await highscore_repo.get_by_user_id(current_user.id)
+        if not highscore:
+            raise HTTPException(status_code=404, detail="Highscore not found for user")
+
+        if result == GameResult.WIN:
+            highscore.add_win()
+        else:
+            highscore.add_loss()
+
+    await db.commit()
 
     return {
         "results": result,
