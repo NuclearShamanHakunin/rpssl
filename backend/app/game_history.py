@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy import Column, Integer, ForeignKey, desc, Text, func
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import Column, Integer, ForeignKey, desc, Text, func, delete
 from sqlalchemy.orm import relationship
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -59,6 +59,15 @@ class GameHistoryRepository:
         self.db.add(new_history)
         await self.db.flush()
         return new_history
+    
+    async def reset_all(self):
+        try:
+            await self.db.execute(delete(GameHistory))
+            await self.db.commit()
+            return True
+        except Exception:
+            await self.db.rollback()
+            return False
 
 
 @router.get("/gamehistory")
@@ -68,3 +77,15 @@ async def get_game_history(db: AsyncSession = Depends(get_db)):
     if not history_data:
         return []
     return [{"result": h.result_string} for h in history_data]
+
+
+@router.post("/gamehistory/reset")
+async def reset_game_history(db: AsyncSession = Depends(get_db)):
+    repo = GameHistoryRepository(db)
+    success = await repo.reset_all()
+    if success:
+        return {"message": "Game history has been successfully reset."}
+    else:
+        raise HTTPException(
+            status_code=500, detail="Failed to reset game history."
+        )
