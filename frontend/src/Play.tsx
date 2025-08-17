@@ -28,11 +28,11 @@ interface GameResult {
 }
 
 const choiceImages: { [key: string]: string } = {
-    rock: '/resources/rock.png',
-    paper: '/resources/paper.png',
-    scissors: '/resources/scissors.png',
-    lizard: '/resources/lizard.png',
-    spock: '/resources/spock.png',
+    rock: 'resources/rock.png',
+    paper: 'resources/paper.png',
+    scissors: 'resources/scissors.png',
+    lizard: 'resources/lizard.png',
+    spock: 'resources/spock.png',
 };
 
 const Play: React.FC = () => {
