@@ -6,6 +6,7 @@ from .schemas import PlayRequest, PlayResponse, GameResult
 from .user import User, get_current_user
 from .database import get_db
 from .highscore import HighscoreRepository
+from .game_history import GameHistoryRepository
 
 
 router = APIRouter()
@@ -72,6 +73,21 @@ async def play(
 
     result = calculate_winner(play_request.player, computer_choice)
 
+    player_choice_name = VALID_CHOICES[play_request.player]["name"]
+    computer_choice_name = VALID_CHOICES[computer_choice]["name"]
+
+    if result == GameResult.WIN:
+        outcome = f"{current_user.username} won"
+    elif result == GameResult.LOSE:
+        outcome = "Computer won"
+    else:
+        outcome = "Tie"
+
+    result_string = f"{current_user.username} vs Computer - {player_choice_name} vs {computer_choice_name} - {outcome}"
+
+    game_history_repo = GameHistoryRepository(db)
+    await game_history_repo.add_game_history(current_user.id, result_string)
+
     if result != GameResult.TIE:
         repo = HighscoreRepository(db)
         highscore = await repo.get_by_user_id(current_user.id)
@@ -83,7 +99,7 @@ async def play(
         else:
             highscore.add_loss()
 
-        await db.commit()
+    await db.commit()
 
     return {
         "results": result,

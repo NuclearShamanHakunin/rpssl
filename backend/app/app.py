@@ -4,6 +4,7 @@ from .highscore import Highscore, router as highscore_router
 from .auth import router as auth_router
 from .game import router as game_router
 from .user import router as user_router, User, UserType, UserRepository
+from .game_history import router as game_history_router
 from .config import ADMIN_USERNAME, ADMIN_PASSWORD
 
 
@@ -12,6 +13,7 @@ app.include_router(auth_router)
 app.include_router(game_router)
 app.include_router(user_router)
 app.include_router(highscore_router)
+app.include_router(game_history_router)
 
 
 @app.on_event("startup")

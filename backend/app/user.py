@@ -25,6 +25,7 @@ class User(Base):
     highscore = relationship(
         "Highscore", back_populates="user", uselist=False, lazy="joined"
     )
+    game_history = relationship("GameHistory", back_populates="user")
 
     def set_password(self, password: str):
         self.password_hash = bcrypt.hashpw(
